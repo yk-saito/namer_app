@@ -33,6 +33,17 @@ class MyAppState extends ChangeNotifier {
     // current への変更を MyAppState に通知します
     notifyListeners();
   }
+
+  var favorites = <WordPair>[];
+
+  void toggleFavorite() {
+    if (favorites.contains(current)) {
+      favorites.remove(current);
+    } else {
+      favorites.add(current);
+    }
+    notifyListeners();
+  }
 }
 
 class MyHomePage extends StatelessWidget {
@@ -43,6 +54,14 @@ class MyHomePage extends StatelessWidget {
     var appState = context.watch<MyAppState>();
     var pair = appState.current;
 
+    // お気に入りの単語ペアであるかどうかを判断します。
+    IconData icon;
+    if (appState.favorites.contains(pair)) {
+      icon = Icons.favorite;
+    } else {
+      icon = Icons.favorite_border;
+    }
+
     // どの build メソッドも必ずウィジェットか、ウィジェットのネストしたツリー（こちらの方が一般的）を返します。
     return Scaffold(
       // Column は、Flutterにおける非常に基本的なレイアウトウィジェットです。任意の数の子を従え、それらを上から下へ一列に配置します。
@@ -52,11 +71,25 @@ class MyHomePage extends StatelessWidget {
           children: [
             BigCard(pair: pair),
             SizedBox(height: 20),
-            ElevatedButton(
-                onPressed: () {
-                  appState.getNext();
-                },
-                child: Text('Next')),
+            Row(
+              // Row に対して水平方向のスペースをすべて埋めないように指示します。
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    appState.toggleFavorite();
+                  },
+                  icon: Icon(icon),
+                  label: Text('Like'),
+                ),
+                SizedBox(width: 10),
+                ElevatedButton(
+                    onPressed: () {
+                      appState.getNext();
+                    },
+                    child: Text('Next')),
+              ],
+            ),
           ],
         ),
       ),
