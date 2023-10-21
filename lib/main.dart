@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
         title: 'Namer App',
         theme: ThemeData(
           useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
         ),
         home: MyHomePage(),
       ),
@@ -41,20 +41,56 @@ class MyHomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     // watch メソッドを使用して、アプリの現在の状態に対する変更を追跡します。
     var appState = context.watch<MyAppState>();
+    var pair = appState.current;
 
     // どの build メソッドも必ずウィジェットか、ウィジェットのネストしたツリー（こちらの方が一般的）を返します。
     return Scaffold(
       // Column は、Flutterにおける非常に基本的なレイアウトウィジェットです。任意の数の子を従え、それらを上から下へ一列に配置します。
-      body: Column(
-        children: [
-          Text('A random AWESOME idea:'),
-          Text(appState.current.asLowerCase),
-          ElevatedButton(
-              onPressed: () {
-                appState.getNext();
-              },
-              child: Text('Next')),
-        ],
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            BigCard(pair: pair),
+            SizedBox(height: 20),
+            ElevatedButton(
+                onPressed: () {
+                  appState.getNext();
+                },
+                child: Text('Next')),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class BigCard extends StatelessWidget {
+  const BigCard({
+    super.key,
+    required this.pair,
+  });
+
+  final WordPair pair;
+
+  @override
+  Widget build(BuildContext context) {
+    // アプリの現在のテーマを取得します。
+    final theme = Theme.of(context);
+    // テキストのスタイルを定義します。
+    final style = theme.textTheme.displayMedium!.copyWith(
+      color: theme.colorScheme.onPrimary,
+    );
+
+    return Card(
+      // カードの背景色をテーマの colorScheme プロパティと同じになるよう定義します。
+      color: theme.colorScheme.primary,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Text(
+          pair.asLowerCase,
+          style: style,
+          semanticsLabel: "${pair.first} ${pair.second}",
+        ),
       ),
     );
   }
