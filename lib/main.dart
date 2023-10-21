@@ -1,5 +1,6 @@
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -46,9 +47,71 @@ class MyAppState extends ChangeNotifier {
   }
 }
 
-class MyHomePage extends StatelessWidget {
+class MyHomePage extends StatefulWidget {
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  var selectedIndex = 0;
+
   @override
   // どのウィジェットでも、そのウィジェットを常に最新にするために、周囲の状況が変化するたびに自動的に呼び出される build メソッドを定義します。
+  Widget build(BuildContext context) {
+    Widget page;
+    switch (selectedIndex) {
+      case 0:
+        page = GeneratorPage();
+        break;
+      case 1:
+        page = Placeholder();
+        break;
+      default:
+        throw UnimplementedError('no widget for $selectedIndex');
+    }
+
+    // LayoutBuilder の builder コールバックは、ウィジェットのサイズが変更されるたび（ウィンドウサイズを変更、スマートフォンの向きを変えた、など）に呼び出されます。
+    return LayoutBuilder(builder: (context, constraints) {
+      return Scaffold(
+          body: Row(
+        children: [
+          // SafeArea は、子がハードウェア ノッチやステータスバーで隠れないようにするためのウィジェットです。
+          SafeArea(
+            child: NavigationRail(
+              extended: constraints.maxWidth >= 600,
+              destinations: [
+                NavigationRailDestination(
+                  icon: Icon(Icons.home),
+                  label: Text('Home'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.favorite),
+                  label: Text('Favorites'),
+                ),
+              ],
+              selectedIndex: selectedIndex,
+              onDestinationSelected: (value) {
+                setState(() {
+                  // UI を更新するために、selectedIndex を変更します。
+                  selectedIndex = value;
+                });
+              },
+            ),
+          ),
+          // Expanded は、子を親の空きスペースに合わせるためのウィジェットです。
+          Expanded(
+              child: Container(
+            color: Theme.of(context).colorScheme.primaryContainer,
+            child: page,
+          ))
+        ],
+      ));
+    });
+  }
+}
+
+class GeneratorPage extends StatelessWidget {
+  @override
   Widget build(BuildContext context) {
     // watch メソッドを使用して、アプリの現在の状態に対する変更を追跡します。
     var appState = context.watch<MyAppState>();
